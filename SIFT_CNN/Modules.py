@@ -31,7 +31,7 @@ class SIFT_Gaussion(nn.Module): # 用于生成高斯序列处理的图像
         g0_4.unsqueeze_(1)
         
         
-        # (batchsize,Gaussion_levels,channel,H,W)
+        # (batch size,Gaussian_levels,channel,H,W)
         return torch.concatenate((g0_0,g0_1,g0_2,g0_3,g0_4),1)
 
 
@@ -43,7 +43,7 @@ class SIFT_DOG(nn.Module):
         
     
     def forward(self,p0):
-        # (batchsize,3,512,512) input
+        # (batch-size,3,512,512) input
         p0 = self.gray(p0) # (batchSize,channel,H,W)
         p0_g = self.gaussion_piramid(p0)
         

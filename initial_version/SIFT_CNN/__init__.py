@@ -9,6 +9,7 @@ import FeaturesModule as FM
 class SIFTNeXt(nn.modules):
     def __init__(self):
         super(SIFTNeXt,self).__init__()
+        self.sift_layer = FM.SIFT_DOG()
 
 
 

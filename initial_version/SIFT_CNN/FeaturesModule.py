@@ -4,7 +4,15 @@ from torch.nn import functional as F
 from torchvision.transforms import functional as TVF
 from torchvision import transforms
 
-class SIFT_Gaussion(nn.Module):
+class SIFT_Gaussion(nn.Module): # 用于生成高斯序列处理的图像
+    """
+    SIFT高斯金字塔生成模块 
+    功能：生成单个octave的5层高斯模糊图像（含原始图像）
+    参数说明：
+        k: 尺度空间比例因子，默认值对应k=2^(1/3)
+        sigma: 初始高斯核标准差
+    """
+    
     def __init__(self,k=1.148698354997035,sigma=1.6):
         super(SIFT_Gaussion,self).__init__()
         self.k = torch.Tensor([k])
@@ -35,8 +43,8 @@ class SIFT_DOG(nn.Module):
         
     
     def forward(self,p0):
-        # (3,512,512) input
-        p0 = self.gray(p0) #(batchSize,channel,H,W)
+        # (batchsize,3,512,512) input
+        p0 = self.gray(p0) # (batchSize,channel,H,W)
         p0_g = self.gaussion_piramid(p0)
         
         p1 = F.avg_pool2d(p0_g[2],2,2)
@@ -58,11 +66,11 @@ class SIFT_DOG(nn.Module):
         p4_d = torch.diff(p4_g, n=1, dim=1)
 
         
-        return p0_d,p1_d,p2_d,p3_d,p4_d
+        return p0_d,p1_d,p2_d,p3_d,p4_d # 返回高斯差分金字塔
     
 if __name__ == '__main__':
     testnn = SIFT_DOG()
-    x = torch.zeros((16,3,512,512))
+    x = torch.zeros((16,3,512,512))# 模拟16张512x512的RGB图像
     y = testnn(x)
     pass
 

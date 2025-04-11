@@ -12,12 +12,12 @@ class SIFT_Gaussion(nn.Module): # 用于生成高斯序列处理的图像
         k: 尺度空间比例因子，默认值对应k=2^(1/3)
         sigma: 初始高斯核标准差
     """
-    
+
     def __init__(self,k=1.148698354997035,sigma=1.6):
         super(SIFT_Gaussion,self).__init__()
         self.k = torch.Tensor([k])
         self.sigma = torch.Tensor([sigma])
-        
+
     def forward(self,x:torch.Tensor):
         g0_1 = TVF.gaussian_blur(x, 3, self.sigma.item())
         g0_2 = TVF.gaussian_blur(g0_1, 3, (self.k*self.sigma).item())
@@ -41,22 +41,24 @@ class SIFT_DOG(nn.Module):
         self.gaussion_piramid = SIFT_Gaussion(k,sigma)
         self.gray = transforms.Grayscale(1)
         
+    def sift_downsample(self,x):
+        return x[:, :, ::2, ::2]
     
     def forward(self,p0):
         # (batch-size,3,512,512) input
         p0 = self.gray(p0) # (batchSize,channel,H,W)
         p0_g = self.gaussion_piramid(p0)
         
-        p1 = F.avg_pool2d(p0_g[2],2,2)
+        p1 = self.sift_downsample(p0_g[:,2])
         p1_g = self.gaussion_piramid(p1)
         
-        p2 = F.avg_pool2d(p1_g[2],2,2)
+        p2 = self.sift_downsample(p1_g[:,2])
         p2_g = self.gaussion_piramid(p2)
         
-        p3 = F.avg_pool2d(p2_g[2],2,2)
+        p3 = self.sift_downsample(p2_g[:,2])
         p3_g = self.gaussion_piramid(p3)
         
-        p4 = F.avg_pool2d(p3_g[2],2,2)
+        p4 = self.sift_downsample(p3_g[:,2])
         p4_g = self.gaussion_piramid(p4)
         
         p0_d = torch.diff(p0_g, n=1, dim=1)
@@ -67,10 +69,14 @@ class SIFT_DOG(nn.Module):
 
         
         return p0_d,p1_d,p2_d,p3_d,p4_d # 返回高斯差分金字塔
-    
+
+
+
 if __name__ == '__main__':
     testnn = SIFT_DOG()
     x = torch.zeros((16,3,512,512))# 模拟16张512x512的RGB图像
     y = testnn(x)
+    for it in y:
+        print(it.shape)
     pass
 

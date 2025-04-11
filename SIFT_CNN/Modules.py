@@ -70,7 +70,26 @@ class SIFT_DOG(nn.Module):
         
         return p0_d,p1_d,p2_d,p3_d,p4_d # 返回高斯差分金字塔
 
+class CBAM(nn.Module):
+    def __init__(self):
+        super(CBAM,self).__init__()
+        
+    def forward(self,x):
+        pass
+    
+class SRE_CONV(nn.Module):
+    def __init__(self):
+        super(SRE_CONV,self).__init__()
+        
+    def forward(self,x):
+        pass
 
+class ResNeXt(nn.Module):
+    def __init__(self):
+        super(ResNeXt,self).__init__()
+        
+    def forward(self,x):
+        pass
 
 if __name__ == '__main__':
     testnn = SIFT_DOG()

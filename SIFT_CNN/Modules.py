@@ -7,10 +7,9 @@ from torchvision import transforms
 class SIFT_Gaussion(nn.Module): # 用于生成高斯序列处理的图像
     """
     SIFT高斯金字塔生成模块 
-    功能：生成单个octave的5层高斯模糊图像（含原始图像）
-    参数说明：
-        k: 尺度空间比例因子，默认值对应k=2^(1/3)
-        sigma: 初始高斯核标准差
+    生成单个octave的5层高斯模糊图像（含原始图像）
+    k: 尺度空间比例因子，默认值对应k=2^(1/3)
+    sigma: 初始高斯核标准差
     """
 
     def __init__(self,k=1.148698354997035,sigma=1.6):
@@ -18,11 +17,23 @@ class SIFT_Gaussion(nn.Module): # 用于生成高斯序列处理的图像
         self.k = torch.Tensor([k])
         self.sigma = torch.Tensor([sigma])
 
+    def cal_k_size(self,sigma):
+        ks = int(6*sigma+1)
+        if ks % 2 == 0:
+            ks -=1 
+        return ks
+    
     def forward(self,x:torch.Tensor):
-        g0_1 = TVF.gaussian_blur(x, 3, self.sigma.item())
-        g0_2 = TVF.gaussian_blur(g0_1, 3, (self.k*self.sigma).item())
-        g0_3 = TVF.gaussian_blur(g0_2, 3, (self.k.pow(2)*self.sigma).item())
-        g0_4 = TVF.gaussian_blur(g0_3, 3, (self.k.pow(3)*self.sigma).item())
+        
+        s1=self.sigma.item()
+        s2=(self.k*self.sigma).item()
+        s3=(self.k.pow(2)*self.sigma).item()
+        s4=(self.k.pow(3)*self.sigma).item()
+        
+        g0_1 = TVF.gaussian_blur(x, self.cal_k_size(s1), s1)
+        g0_2 = TVF.gaussian_blur(g0_1, self.cal_k_size(s2), s2)
+        g0_3 = TVF.gaussian_blur(g0_2, self.cal_k_size(s3), s3)
+        g0_4 = TVF.gaussian_blur(g0_3, self.cal_k_size(s4), s4)
         
         g0_0 = x.unsqueeze(1)
         g0_1.unsqueeze_(1)
@@ -92,10 +103,20 @@ class ResNeXt(nn.Module):
         pass
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     testnn = SIFT_DOG()
-    x = torch.zeros((16,3,512,512))# 模拟16张512x512的RGB图像
+    x = torch.Tensor(plt.imread('SIFT_CNN\ISIC_0000002.jpg')).permute(2,0,1)/255
+    x.unsqueeze_(0)
+    x = TVF.resize(x,(512,512))
+    # plt.imshow(x[0].permute(1,2,0).numpy())
+    # plt.show()
+    # 模拟1张512x512的RGB图像
     y = testnn(x)
+    i = 0
     for it in y:
-        print(it.shape)
+        for j in range(it.shape[1]):
+            img = ((it[0,j,0])).numpy()
+            plt.imsave('./差分金字塔/%d_%d.jpg'%(i,j),img)
+        i=i+1
     pass
 

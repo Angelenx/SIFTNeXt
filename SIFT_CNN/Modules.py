@@ -105,7 +105,7 @@ class ResNeXt(nn.Module):
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     testnn = SIFT_DOG()
-    x = torch.Tensor(plt.imread('SIFT_CNN\ISIC_0000002.jpg')).permute(2,0,1)/255
+    x = torch.Tensor(plt.imread('SIFT_CNN\ISIC_0000002.jpg').copy()).permute(2,0,1)/255
     x.unsqueeze_(0)
     x = TVF.resize(x,(512,512))
     # plt.imshow(x[0].permute(1,2,0).numpy())
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     for it in y:
         for j in range(it.shape[1]):
             img = ((it[0,j,0])).numpy()
-            plt.imsave('./差分金字塔/%d_%d.jpg'%(i,j),img)
+            plt.imsave('./DOG_result/%d_%d.jpg'%(i,j),img)
         i=i+1
     pass
 
